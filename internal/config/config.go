@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/joho/godotenv"
@@ -14,6 +15,10 @@ type Config struct {
 	EthRpcUrl   string
 	NetworkName string
 	EthPrivate  string
+
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
 }
 
 var (
@@ -47,6 +52,10 @@ func MustLoad() Config {
 			EthRpcUrl:   os.Getenv("ETH_RPC_URL"),
 			NetworkName: os.Getenv("ETH_NETWORK_NAME"),
 			EthPrivate:  os.Getenv("ETH_PRIVATE"),
+
+			RedisAddr:     getEnvDefault("REDIS_ADDR", "127.0.0.1:6379"),
+			RedisPassword: getEnvDefault("REDIS_PASSWORD", ""),
+			RedisDB:       getEnvDefaultInt("REDIS_DB", 0),
 		}
 
 		if cfg.EthRpcUrl == "" {
@@ -82,6 +91,17 @@ func findEnvFile() string {
 func getEnvDefault(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
+	}
+	return def
+}
+
+func getEnvDefaultInt(key string, def int) int {
+	if v := os.Getenv(key); v != "" {
+		n, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			return def // 如果解析失败，也返回默认值
+		}
+		return int(n)
 	}
 	return def
 }

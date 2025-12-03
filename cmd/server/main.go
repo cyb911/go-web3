@@ -10,6 +10,9 @@ func main() {
 	var err error
 	cfg := config.Get()
 
+	// redis 初始化
+	config.InitRedis()
+
 	// 初始化 ETH client
 	config.InitEthClient()
 
