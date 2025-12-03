@@ -40,5 +40,12 @@ func SetupRouter() *gin.Engine {
 		accountGroup.GET("/block/:number", handlers.GetBlockInfo)
 	}
 
+	// 合约交互
+	contractGroup := r.Group("/contract/nft/auction")
+	{
+		// 结算拍卖
+		contractGroup.GET("/settle/:auctionId", handlers.SettleAuction)
+	}
+
 	return r
 }

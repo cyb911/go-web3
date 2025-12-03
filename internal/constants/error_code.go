@@ -17,6 +17,8 @@ const (
 
 	AccountError = "E30001"
 
+	ContractError = "E40001"
+
 	// InternalServerError 系统内部错误，非代码逻辑错误。
 	InternalServerError = "E90000"
 )

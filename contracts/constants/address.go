@@ -1,0 +1,5 @@
+package constants
+
+const (
+	ADDRESS_NFT_AUCTION = "0xc2c0d3F53A7D737C8146Fe1A5d3eC2eBb05b6E80"
+)
