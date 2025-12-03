@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go-web3/internal/config"
+	"go-web3/internal/infra/eth"
 	"math"
 	"math/big"
 
@@ -25,7 +26,7 @@ func GetEthBalance(address string) (*Balance, error) {
 
 	// 查询余额（单位：Wei）
 	account := common.HexToAddress(address)
-	balanceWei, err := config.EthClient.BalanceAt(context.Background(), account, nil)
+	balanceWei, err := eth.EthClient.BalanceAt(context.Background(), account, nil)
 	if err != nil {
 		return nil, err
 	}

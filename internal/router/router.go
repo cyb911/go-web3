@@ -1,9 +1,9 @@
 package router
 
 import (
-	"go-web3/internal/config"
 	"go-web3/internal/constants"
 	"go-web3/internal/handlers"
+	"go-web3/internal/infra/redis"
 	"go-web3/internal/utils"
 	"log"
 	"time"
@@ -30,11 +30,11 @@ func SetupRouter() *gin.Engine {
 	})
 
 	r.GET("/health/redis", func(c *gin.Context) {
-		err := config.Rdb.Set(config.Ctx, "health", "health", 10*time.Minute).Err()
+		err := redis.Rdb.Set(redis.Ctx, "health", "health", 10*time.Minute).Err()
 		if err != nil {
 			panic(err)
 		}
-		result, err := config.Rdb.Get(config.Ctx, "health").Result()
+		result, err := redis.Rdb.Get(redis.Ctx, "health").Result()
 		if err != nil {
 			return
 		}

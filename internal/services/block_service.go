@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 	"errors"
-	"go-web3/internal/config"
+	"go-web3/internal/infra/eth"
 	"math/big"
 )
 
@@ -20,7 +20,7 @@ type BlockInfo struct {
 func GetBlockInfo(blockNumber uint64) (*BlockInfo, error) {
 	ctx := context.Background()
 	num := new(big.Int).SetUint64(blockNumber)
-	block, err := config.EthClient.BlockByNumber(ctx, num)
+	block, err := eth.EthClient.BlockByNumber(ctx, num)
 
 	if err != nil {
 		return nil, errors.New("failed to get block: " + err.Error())

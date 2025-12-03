@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"go-web3/internal/config"
+	"go-web3/internal/infra/eth"
 	"go-web3/internal/utils"
 	"math/big"
 
@@ -26,7 +27,7 @@ func Trans(to string, amountEth string) (string, error) {
 	from := crypto.PubkeyToAddress(*publicKey)
 
 	// nonce
-	nonce, err := config.EthClient.PendingNonceAt(context.Background(), from)
+	nonce, err := eth.EthClient.PendingNonceAt(context.Background(), from)
 	if err != nil {
 		return "", err
 	}
@@ -38,13 +39,13 @@ func Trans(to string, amountEth string) (string, error) {
 	}
 
 	// EIP-1559 推荐 gas 参数
-	tipCap, err := config.EthClient.SuggestGasTipCap(ctx) // maxPriorityFeePerGas
+	tipCap, err := eth.EthClient.SuggestGasTipCap(ctx) // maxPriorityFeePerGas
 	if err != nil {
 		return "", err
 	}
 
 	// 获取最新区块 → baseFee
-	header, err := config.EthClient.HeaderByNumber(ctx, nil)
+	header, err := eth.EthClient.HeaderByNumber(ctx, nil)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +59,7 @@ func Trans(to string, amountEth string) (string, error) {
 
 	// 构造交易信息
 	toAddress := common.HexToAddress(to)
-	chainID, err := config.EthClient.ChainID(ctx)
+	chainID, err := eth.EthClient.ChainID(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -82,7 +83,7 @@ func Trans(to string, amountEth string) (string, error) {
 	}
 
 	// 广播交易
-	err = config.EthClient.SendTransaction(ctx, signTx)
+	err = eth.EthClient.SendTransaction(ctx, signTx)
 	if err != nil {
 		return "", err
 	}

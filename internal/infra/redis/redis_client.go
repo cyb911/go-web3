@@ -1,7 +1,8 @@
-package config
+package redis
 
 import (
 	"context"
+	"go-web3/internal/config"
 	"log"
 	"time"
 
@@ -15,7 +16,7 @@ var (
 
 // Init 初始化 Redis 客户端
 func InitRedis() {
-	cfg := Get()
+	cfg := config.Get()
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:         cfg.RedisAddr,
 		Password:     cfg.RedisPassword,

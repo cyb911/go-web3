@@ -8,6 +8,7 @@ import (
 	"go-web3/contracts/constants"
 	"go-web3/contracts/nftauction"
 	"go-web3/internal/config"
+	"go-web3/internal/infra/eth"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -27,7 +28,7 @@ func SettleAuction(auctionId *big.Int) error {
 	}
 
 	// 创建授权对象 auth（用于发送交易）
-	chainID, err := config.EthClient.ChainID(ctx)
+	chainID, err := eth.EthClient.ChainID(ctx)
 	if err != nil {
 		return err
 	}
@@ -42,7 +43,7 @@ func SettleAuction(auctionId *big.Int) error {
 	// 设置 nonce
 	pubKey := privateKey.Public().(*ecdsa.PublicKey)
 	fromAddr := crypto.PubkeyToAddress(*pubKey)
-	nonce, err := config.EthClient.PendingNonceAt(ctx, fromAddr)
+	nonce, err := eth.EthClient.PendingNonceAt(ctx, fromAddr)
 	if err != nil {
 		return err
 	}
@@ -50,7 +51,7 @@ func SettleAuction(auctionId *big.Int) error {
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = big.NewInt(0)
 
-	gasPrice, err := config.EthClient.SuggestGasPrice(ctx)
+	gasPrice, err := eth.EthClient.SuggestGasPrice(ctx)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func SettleAuction(auctionId *big.Int) error {
 
 	// 绑定已经部署的合约(代理地址)
 	address := common.HexToAddress(constants.ADDRESS_NFT_AUCTION)
-	instance, err := nftauction.NewNftauctionTransactor(address, config.EthClient)
+	instance, err := nftauction.NewNftauctionTransactor(address, eth.EthClient)
 	if err != nil {
 		return err
 	}

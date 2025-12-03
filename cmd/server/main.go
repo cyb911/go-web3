@@ -2,6 +2,8 @@ package main
 
 import (
 	"go-web3/internal/config"
+	"go-web3/internal/infra/eth"
+	"go-web3/internal/infra/redis"
 	"go-web3/internal/router"
 	"log"
 )
@@ -11,10 +13,10 @@ func main() {
 	cfg := config.Get()
 
 	// redis 初始化
-	config.InitRedis()
+	redis.InitRedis()
 
 	// 初始化 ETH client
-	config.InitEthClient()
+	eth.InitEthClient()
 
 	// 设置路由
 	r := router.SetupRouter()
