@@ -18,6 +18,8 @@ func main() {
 	// 初始化 ETH client
 	eth.InitEthClient()
 
+	eth.InitNonce(redis.Rdb)
+
 	// 设置路由
 	r := router.SetupRouter()
 
