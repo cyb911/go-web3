@@ -60,6 +60,7 @@ func SetupRouter() *gin.Engine {
 	// 合约交互
 	contractGroup := r.Group("/contract/nft/auction")
 	{
+		// TODO 创建拍卖功能
 		// 结算拍卖
 		contractGroup.GET("/settle/:auctionId", handlers.SettleAuction)
 	}

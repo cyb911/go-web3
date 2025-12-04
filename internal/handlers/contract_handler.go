@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SettleAuction 拍卖结算
 func SettleAuction(c *gin.Context) {
 	auctionIdStr := c.Param("auctionId")
 	if auctionIdStr == "" {
