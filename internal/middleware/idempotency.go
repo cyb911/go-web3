@@ -92,7 +92,7 @@ func Idempotency() gin.HandlerFunc {
 
 		// 缓存 handlers 响应数据
 		rec := &responseRecorder{
-			ResponseWriter: c.Writer,
+			ResponseWriter: c.Writer, // 组合ResponseWriter，以便使用自定义 Gin ResponseWriter
 			body:           &bytes.Buffer{},
 			statusCode:     http.StatusOK,
 		}
