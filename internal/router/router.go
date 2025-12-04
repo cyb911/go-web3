@@ -4,7 +4,6 @@ import (
 	"go-web3/internal/constants"
 	"go-web3/internal/handlers"
 	"go-web3/internal/infra/redis"
-	"go-web3/internal/middleware"
 	"go-web3/internal/utils"
 	"log"
 	"time"
@@ -43,19 +42,7 @@ func SetupRouter() *gin.Engine {
 	})
 
 	accountGroup := r.Group("/account")
-	{
-		// 获取账户地址余额信息
-		accountGroup.GET("/:address", handlers.GetBalance)
-
-		// 转账
-		accountGroup.POST("/trans", middleware.Idempotency(), handlers.Trans)
-
-		// 查询交易收据
-		accountGroup.GET("/trans/receipt/:txHash", handlers.GetTxReceipt)
-
-		//查询指定区块号的区块信息
-		accountGroup.GET("/block/:number", handlers.GetBlockInfo)
-	}
+	registerAccountRoutes(accountGroup)
 
 	// 合约交互
 	contractGroup := r.Group("/contract/nft/auction")
