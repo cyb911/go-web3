@@ -25,7 +25,7 @@ func main() {
 
 	log.Printf("Server listening on :%s", cfg.AppPort)
 
-	err = r.Run(":" + cfg.AppPort)
+	err = r.Run(":" + cfg.AppPort())
 	if err != nil {
 		panic(err)
 	}

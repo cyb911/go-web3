@@ -16,11 +16,11 @@ var (
 
 // Init 初始化 Redis 客户端
 func InitRedis() {
-	cfg := config.Get()
+	cfg := config.Get().RedisConfig()
 	Rdb = redis.NewClient(&redis.Options{
-		Addr:         cfg.RedisAddr,
-		Password:     cfg.RedisPassword,
-		DB:           cfg.RedisDB,
+		Addr:         cfg.Addr,
+		Password:     cfg.Password,
+		DB:           cfg.DB,
 		PoolSize:     20,
 		MinIdleConns: 5,
 

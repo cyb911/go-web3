@@ -40,6 +40,6 @@ func GetEthBalance(address string) (*Balance, error) {
 		Address:     address,
 		BalanceWei:  balanceWei.String(),
 		BalanceETH:  ethStr,
-		NetworkName: config.Get().NetworkName,
+		NetworkName: config.Get().EthConfig().NetworkName,
 	}, nil
 }

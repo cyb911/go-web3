@@ -11,21 +11,40 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Config struct {
-	AppPort     string
-	EthRpcUrl   string
-	NetworkName string
-	EthPrivate  string
+type RedisConfig struct {
+	Addr     string
+	Password string
+	DB       int
+}
 
-	RedisAddr     string
-	RedisPassword string
-	RedisDB       int
+type EthConfig struct {
+	RpcUrl      string
+	NetworkName string
+	Private     string
+}
+
+type Config struct {
+	appPort     string
+	ethConfig   *EthConfig
+	redisConfig *RedisConfig
 }
 
 var (
 	cfg  *Config
 	once sync.Once
 )
+
+func (c Config) AppPort() string {
+	return c.appPort
+}
+
+func (c Config) RedisConfig() RedisConfig {
+	return *c.redisConfig
+}
+
+func (c Config) EthConfig() EthConfig {
+	return *c.ethConfig
+}
 
 // Get 获取配置数据，返回值类型
 func Get() Config {
@@ -39,14 +58,18 @@ func MustLoad() Config {
 	once.Do(func() {
 		loadEnvFiles()
 		cfg = &Config{
-			AppPort:     getEnv("APP_PORT", "8080"),
-			EthRpcUrl:   getEnv("ETH_RPC_URL", ""),
-			NetworkName: getEnv("ETH_NETWORK_NAME", ""),
-			EthPrivate:  getEnv("ETH_PRIVATE", ""),
+			appPort: getEnv("APP_PORT", "8080"),
+			ethConfig: &EthConfig{
+				RpcUrl:      getEnv("ETH_RPC_URL", ""),
+				NetworkName: getEnv("ETH_NETWORK_NAME", ""),
+				Private:     getEnv("ETH_PRIVATE", ""),
+			},
 
-			RedisAddr:     getEnv("REDIS_ADDR", "127.0.0.1:6379"),
-			RedisPassword: getEnv("REDIS_PASSWORD", ""),
-			RedisDB:       getEnv("REDIS_DB", 0),
+			redisConfig: &RedisConfig{
+				Addr:     getEnv("REDIS_ADDR", "127.0.0.1:6379"),
+				Password: getEnv("REDIS_PASSWORD", ""),
+				DB:       getEnv("REDIS_DB", 0),
+			},
 		}
 
 		validateConfig(cfg)
@@ -139,15 +162,16 @@ func getEnv[T any](key string, def T) T {
 }
 
 func validateConfig(c *Config) {
-	if cfg.EthRpcUrl == "" {
+	ethCfg := c.EthConfig()
+	if ethCfg.RpcUrl == "" {
 		log.Fatal("配置错误：缺少 ETH_RPC_URL")
 	}
 
-	if cfg.NetworkName == "" {
+	if ethCfg.NetworkName == "" {
 		log.Fatal("配置错误：缺少 ETH_NETWORK_NAME")
 	}
 
-	if cfg.EthPrivate == "" {
+	if ethCfg.Private == "" {
 		log.Fatal("配置错误：缺少 ETH_PRIVATE")
 	}
 }

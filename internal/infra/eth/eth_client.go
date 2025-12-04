@@ -12,8 +12,8 @@ var EthClient *ethclient.Client
 var NonceMgr *NonceManager
 
 func InitEthClient() {
-	cfg := config.Get()
-	client, err := ethclient.Dial(cfg.EthRpcUrl)
+	cfg := config.Get().EthConfig()
+	client, err := ethclient.Dial(cfg.RpcUrl)
 	if err != nil {
 		log.Fatalf("Failed to connect to Ethereum RPC: %v", err)
 	}

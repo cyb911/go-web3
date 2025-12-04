@@ -20,8 +20,8 @@ import (
 func SettleAuction(auctionId *big.Int) error {
 	ctx := context.Background()
 	// 加载私钥
-	cfg := config.Get()
-	privateKeyHex := cfg.EthPrivate
+	cfg := config.Get().EthConfig()
+	privateKeyHex := cfg.Private
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
 		return errors.New("invalid private key")
