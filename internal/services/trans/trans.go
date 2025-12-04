@@ -1,4 +1,4 @@
-package services
+package trans
 
 import (
 	"context"
@@ -14,6 +14,62 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
+
+type TxReceiptResp struct {
+	TxHash          string       `json:"txHash"`
+	BlockHash       string       `json:"blockHash"`
+	BlockNumber     string       `json:"blockNumber"`
+	From            string       `json:"from"`
+	To              string       `json:"to"`     // 交易接受方地址，如果为 nil 表示合约部署交易
+	Status          uint64       `json:"status"` // 交易执行状态（成功/失败）PS:失败也会被打包到区块中！只是结果为失败。
+	GasUsed         uint64       `json:"gasUsed"`
+	ContractAddress string       `json:"contractAddress"` // 新部署的合约地址
+	Logs            []*types.Log `json:"logs"`            // 合约 emit 的所有事件
+}
+
+func GetTxReceipt(txHash string) (any, error) {
+	ctx := context.Background()
+	hash := common.HexToHash(txHash)
+
+	receipt, err := eth.EthClient.TransactionReceipt(ctx, hash)
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取 from / to
+	tx, _, err := eth.EthClient.TransactionByHash(ctx, hash)
+	if err != nil {
+		return nil, err
+	}
+
+	// 根据chainID 获取 签名者
+	signer := types.LatestSignerForChainID(tx.ChainId())
+	fromAddr, err := types.Sender(signer, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	from := fromAddr.Hex()
+
+	to := ""
+	if tx.To() != nil {
+		to = tx.To().Hex()
+	}
+
+	resp := &TxReceiptResp{
+		TxHash:          receipt.TxHash.Hex(),
+		BlockHash:       receipt.BlockHash.Hex(),
+		BlockNumber:     receipt.BlockNumber.String(),
+		From:            from,
+		To:              to,
+		Status:          receipt.Status,
+		GasUsed:         receipt.GasUsed,
+		ContractAddress: receipt.ContractAddress.Hex(),
+		Logs:            receipt.Logs,
+	}
+	return resp, nil
+
+}
 
 func Trans(to string, amountEth string) (string, error) {
 	ctx := context.Background()

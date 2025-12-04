@@ -19,6 +19,8 @@ const (
 
 	ContractError = "E40001"
 
+	TransError = "E50001"
+
 	// InternalServerError 系统内部错误，非代码逻辑错误。
 	InternalServerError = "E90000"
 )

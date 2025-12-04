@@ -23,7 +23,7 @@ func main() {
 	// 设置路由
 	r := router.SetupRouter()
 
-	log.Printf("Server listening on :%s", cfg.AppPort)
+	log.Printf("Server listening on :%s", cfg.AppPort())
 
 	err = r.Run(":" + cfg.AppPort())
 	if err != nil {

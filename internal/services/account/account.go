@@ -1,4 +1,4 @@
-package services
+package account
 
 import (
 	"context"

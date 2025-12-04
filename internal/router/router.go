@@ -49,6 +49,7 @@ func SetupRouter() *gin.Engine {
 		accountGroup.POST("/trans", handlers.Trans)
 
 		// 查询交易收据
+		accountGroup.GET("/trans/receipt/:txHash", handlers.GetTxReceipt)
 
 		//查询指定区块号的区块信息
 		accountGroup.GET("/block/:number", handlers.GetBlockInfo)
