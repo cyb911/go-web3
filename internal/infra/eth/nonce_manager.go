@@ -103,23 +103,8 @@ func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (
 	return nonce, nil
 }
 
-// 混滚 nonce
+// RevertNonce 采用删除 redis 缓存的方式进行 nonce 进行回退。
 func (nm *NonceManager) RevertNonce(ctx context.Context, addr common.Address) error {
 	key := nm.nonceKey(addr)
-
-	val, err := nm.redis.Get(ctx, key).Result()
-	if err != nil {
-		return err
-	}
-
-	nonce, err := strconv.ParseUint(val, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	if nonce == 0 {
-		return nil
-	}
-
-	return nm.redis.Set(ctx, key, nonce-1, 0).Err()
+	return nm.redis.Del(ctx, key).Err()
 }
