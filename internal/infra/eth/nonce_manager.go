@@ -79,7 +79,7 @@ func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (
 		}
 
 		// 保存下一次要用的 nonce（pending+1）
-		err = nm.redis.Set(ctx, key, pending+1, time.Minute*5).Err()
+		err = nm.redis.Set(ctx, key, pending+1, 0).Err()
 		if err != nil {
 			return 0, err
 		}

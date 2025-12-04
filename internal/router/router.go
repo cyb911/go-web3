@@ -4,6 +4,7 @@ import (
 	"go-web3/internal/constants"
 	"go-web3/internal/handlers"
 	"go-web3/internal/infra/redis"
+	"go-web3/internal/middleware"
 	"go-web3/internal/utils"
 	"log"
 	"time"
@@ -45,8 +46,9 @@ func SetupRouter() *gin.Engine {
 	{
 		// 获取账户地址余额信息
 		accountGroup.GET("/:address", handlers.GetBalance)
+
 		// 转账
-		accountGroup.POST("/trans", handlers.Trans)
+		accountGroup.POST("/trans", middleware.Idempotency(), handlers.Trans)
 
 		// 查询交易收据
 		accountGroup.GET("/trans/receipt/:txHash", handlers.GetTxReceipt)
