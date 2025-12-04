@@ -2,8 +2,11 @@ package eth
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -54,7 +57,7 @@ func (nm *NonceManager) releaseLock(ctx context.Context, key string) {
 	nm.redis.Del(ctx, key)
 }
 
-// 获取 nonce
+// GetNextNonce 获取 nonce
 func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (uint64, error) {
 	lock := nm.lockKey(addr)
 
@@ -68,7 +71,7 @@ func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (
 	// 1. 尝试从 Redis 取 nonce
 	val, err := nm.redis.Get(ctx, key).Result()
 
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		// Redis 中没有 → 从链上初始化
 		pending, err := nm.client.PendingNonceAt(ctx, addr)
 		if err != nil {
@@ -95,7 +98,7 @@ func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (
 	}
 
 	// 存入下一次的 nonce
-	err = nm.redis.Set(ctx, key, nonce+1, 0).Err()
+	err = nm.redis.Set(ctx, key, nonce+1, time.Minute*5).Err()
 	if err != nil {
 		return 0, err
 	}
@@ -103,8 +106,28 @@ func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (
 	return nonce, nil
 }
 
-// RevertNonce 采用删除 redis 缓存的方式进行 nonce 进行回退。
-func (nm *NonceManager) RevertNonce(ctx context.Context, addr common.Address) error {
+func ShouldSyncNonceFromChain(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	msg := err.Error()
+
+	log.Printf("nonce error: %v", msg)
+
+	return strings.Contains(msg, "nonce too low") ||
+		strings.Contains(msg, "nonce too high") ||
+		strings.Contains(msg, "replacement transaction underpriced") ||
+		strings.Contains(msg, "already known") ||
+		strings.Contains(msg, "transaction underpriced")
+}
+
+func (nm *NonceManager) ForceSyncNonce(ctx context.Context, addr common.Address) error {
+	pending, err := nm.client.PendingNonceAt(ctx, addr)
+	if err != nil {
+		return err
+	}
+
 	key := nm.nonceKey(addr)
-	return nm.redis.Del(ctx, key).Err()
+	return nm.redis.Set(ctx, key, pending, 0).Err()
 }

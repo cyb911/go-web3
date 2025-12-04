@@ -8,7 +8,6 @@ import (
 	"go-web3/internal/infra/eth"
 	"go-web3/internal/utils"
 	"math/big"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -142,25 +141,13 @@ func Trans(to string, amountEth string) (string, error) {
 	// 广播交易
 	err = eth.EthClient.SendTransaction(ctx, signTx)
 	if err != nil {
-		if shouldRollbackNonce(err) {
-			_ = eth.NonceMgr.RevertNonce(ctx, from)
+		// 判断 nonce 是否与链上数据不一致。不一致强制同步链上 nonce
+		if eth.ShouldSyncNonceFromChain(err) {
+			_ = eth.NonceMgr.ForceSyncNonce(ctx, from)
 		}
 		return "", err
 	}
 
 	return signTx.Hash().Hex(), nil
 
-}
-
-func shouldRollbackNonce(err error) bool {
-	msg := err.Error()
-
-	// 这些说明 tx 已进入 mempool，不需要回滚
-	if strings.Contains(msg, "already known") ||
-		strings.Contains(msg, "nonce too low") ||
-		strings.Contains(msg, "replacement transaction underpriced") ||
-		strings.Contains(msg, "known transaction") {
-		return false
-	}
-	return true
 }
