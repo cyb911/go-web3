@@ -43,7 +43,7 @@ func SettleAuction(auctionId *big.Int) error {
 	// 设置 nonce
 	pubKey := privateKey.Public().(*ecdsa.PublicKey)
 	fromAddr := crypto.PubkeyToAddress(*pubKey)
-	nonce, err := eth.EthClient.PendingNonceAt(ctx, fromAddr)
+	nonce, err := eth.NonceMgr.GetNextNonce(ctx, fromAddr)
 	if err != nil {
 		return err
 	}
