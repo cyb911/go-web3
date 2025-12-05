@@ -2,7 +2,7 @@ package router
 
 import (
 	"go-web3/internal/constants"
-	"go-web3/internal/handlers"
+	"go-web3/internal/infra/eth"
 	"go-web3/internal/infra/redis"
 	"go-web3/internal/utils"
 	"log"
@@ -41,16 +41,18 @@ func SetupRouter() *gin.Engine {
 		utils.OkData(c, result)
 	})
 
+	r.GET("/health/eth", func(c *gin.Context) {
+		key, _ := eth.GetPrivateKey()
+		utils.OkData(c, key)
+	})
+
+	// 账户模块
 	accountGroup := r.Group("/account")
 	registerAccountRoutes(accountGroup)
 
 	// 合约交互
 	contractGroup := r.Group("/contract/nft/auction")
-	{
-		// TODO 创建拍卖功能
-		// 结算拍卖
-		contractGroup.GET("/settle/:auctionId", handlers.SettleAuction)
-	}
+	registerContractRoutes(contractGroup)
 
 	return r
 }

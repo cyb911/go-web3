@@ -16,7 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-// 拍卖结算
+// SettleAuction 拍卖结算
 func SettleAuction(auctionId *big.Int) error {
 	ctx := context.Background()
 	// 加载私钥
