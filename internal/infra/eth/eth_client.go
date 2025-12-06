@@ -11,16 +11,24 @@ import (
 )
 
 var EthClient *ethclient.Client
+var EthWssClient *ethclient.Client
 var NonceMgr *NonceManager
 
 func InitEthClient() {
 	cfg := config.Get().EthConfig()
-	client, err := ethclient.Dial(cfg.RpcUrl)
+	client, err := ethclient.Dial("https://" + cfg.RpcUrl)
 	if err != nil {
-		log.Fatalf("Failed to connect to Ethereum RPC: %v", err)
+		log.Fatalf("Failed to connect to Ethereum RPC(Https): %v", err)
 	}
 
 	EthClient = client
+
+	wssClient, err := ethclient.Dial("wss://" + cfg.RpcUrl)
+	if err != nil {
+		log.Fatalf("Failed to connect to Ethereum RPC(WebSocket): %v", err)
+	}
+
+	EthWssClient = wssClient
 }
 
 func InitNonce(redis *redis.Client) {
