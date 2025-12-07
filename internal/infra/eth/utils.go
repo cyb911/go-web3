@@ -4,9 +4,11 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"go-web3/internal/config"
+	"sort"
 	"strings"
 	"sync"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -40,4 +42,13 @@ func GetPrivateKey() (*ecdsa.PrivateKey, error) {
 	})
 
 	return cachePrivateKey, loadErr
+}
+
+func SortLogs(logs []types.Log) {
+	sort.Slice(logs, func(i, j int) bool {
+		if logs[i].BlockNumber == logs[j].BlockNumber {
+			return logs[i].Index < logs[j].Index
+		}
+		return logs[i].BlockNumber < logs[j].BlockNumber
+	})
 }

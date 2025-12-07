@@ -2,10 +2,11 @@ package event
 
 // Route 事件路由
 type Route struct {
-	Contract    string         // 合约
-	Event       string         // 事件
-	handlers    []EventHandler // 最终执行的 handler 链
-	middlewares []Middleware   // 中间件列表
+	Contract     string         // 合约
+	Event        string         // 事件
+	handlers     []EventHandler // 最终执行的 handler 链
+	middlewares  []Middleware   // 中间件列表
+	finalHandler EventHandler
 }
 
 func (r *Route) Use(handler interface{}) *Route {
@@ -26,4 +27,12 @@ func (r *Route) Use(handler interface{}) *Route {
 		panic("invalid route Use(): must be Middleware, EventHandler or func(*Context) error")
 	}
 	return r
+}
+
+// Scanner 调用
+func (rt *Route) Handler() EventHandler {
+	if rt.finalHandler == nil {
+		rt.finalHandler = rt.BuildHandler()
+	}
+	return rt.finalHandler
 }

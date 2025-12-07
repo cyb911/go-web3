@@ -3,10 +3,17 @@ package event
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+)
+
+var (
+	routeTable = map[common.Address]map[common.Hash]*Route{}
+	routeMu    sync.RWMutex
 )
 
 type Router struct {
@@ -54,11 +61,26 @@ func (r *Router) Use(m ...Middleware) {
 }
 
 func (r *Router) Event(contract string, event string) *Route {
+	abiInfo, err := GetABIByContract(contract)
+	if err != nil {
+		panic("ABI not registered: " + contract)
+	}
+	AddWatchedAddress(abiInfo.Address)
 	rt := &Route{
 		Contract: contract,
 		Event:    event,
 	}
 	r.Routes = append(r.Routes, rt)
+
+	// 找到事件签名 topic0（Keccak256）
+	ev, ok := abiInfo.ABI.Events[event]
+	if !ok {
+		panic("event " + event + " not found in ABI")
+	}
+
+	// 注册到全局路由表，让扫描器能够找到
+	registerRoute(abiInfo.Address, ev.ID, rt)
+
 	return rt
 }
 
@@ -71,6 +93,14 @@ func (r *Router) Listen() {
 }
 
 func (r *Router) listenRoute(rt *Route) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			r.Logger.Printf("[panic recovered in listenRoute] %v", rec)
+			// 自动重启事件监听
+			go r.listenRoute(rt)
+		}
+	}()
+
 	abiInfo, err := GetABIByContract(rt.Contract)
 	if err != nil {
 		panic(err)
@@ -115,4 +145,26 @@ func (r *Router) listenRoute(rt *Route) {
 			return
 		}
 	}
+}
+
+func registerRoute(addr common.Address, topic common.Hash, rt *Route) {
+	routeMu.Lock()
+	defer routeMu.Unlock()
+
+	if routeTable[addr] == nil {
+		routeTable[addr] = map[common.Hash]*Route{}
+	}
+	routeTable[addr][topic] = rt
+}
+
+func FindRouteByAddressAndTopic(addr common.Address, topic common.Hash) *Route {
+	routeMu.RLock()
+	defer routeMu.RUnlock()
+
+	if m, ok := routeTable[addr]; ok {
+		if rt, ok := m[topic]; ok {
+			return rt
+		}
+	}
+	return nil
 }
