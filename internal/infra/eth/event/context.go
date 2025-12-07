@@ -64,9 +64,9 @@ func (c *Context) BindEvent(out interface{}) error {
 		case "address":
 			field.Set(reflect.ValueOf(common.BytesToAddress(topics[topicIndex].Bytes())))
 
-		case "uint64":
-			bi := new(big.Int).SetBytes(topics[topicIndex].Bytes())
-			field.SetUint(bi.Uint64())
+		//case "uint64":
+		//	bi := new(big.Int).SetBytes(topics[topicIndex].Bytes())
+		//	field.SetUint(bi.Uint64())
 
 		default:
 			return fmt.Errorf("unsupported indexed type %s", arg.Type.String())
