@@ -1,19 +1,12 @@
 package main
 
 import (
-	"go-web3/contracts/constants"
-	"go-web3/contracts/nftauction"
 	"go-web3/internal/config"
-	"go-web3/internal/handlers"
 	"go-web3/internal/infra/eth"
-	"go-web3/internal/infra/eth/event"
 	"go-web3/internal/infra/redis"
 	"go-web3/internal/router"
+	router_event "go-web3/internal/router/event"
 	"log"
-	"os"
-	"strings"
-
-	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 
 func main() {
@@ -29,14 +22,7 @@ func main() {
 	eth.InitNonce(redis.Rdb)
 
 	// ETH 事件处理器
-	parsedABI, _ := abi.JSON(strings.NewReader(nftauction.NftauctionMetaData.ABI))
-	event.RegisterABI("NftAuctionV1", parsedABI, constants.ADDRESS_NFT_AUCTION)
-	logger := log.New(os.Stdout, "[event] ", log.LstdFlags)
-	eventRouter := event.NewRouter(eth.EthWssClient, logger)
-	eventRouter.Use(event.Recover(), event.Logger())
-	eventRouter.Event("NftAuctionV1", "AuctionCreated").
-		Use(handlers.ListenerAuctionCreated)
-
+	eventRouter := router_event.SetupRouter()
 	// 异步执行，不要阻塞main导致gin无法启动
 	go eventRouter.Listen()
 
