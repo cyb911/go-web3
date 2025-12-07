@@ -2,6 +2,7 @@ package router
 
 import (
 	"go-web3/internal/handlers"
+	"go-web3/internal/handlers/eth-block"
 	"go-web3/internal/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -18,5 +19,5 @@ func registerAccountRoutes(router *gin.RouterGroup) {
 	router.GET("/trans/receipt/:txHash", handlers.GetTxReceipt)
 
 	//查询指定区块号的区块信息
-	router.GET("/block/:number", handlers.GetBlockInfo)
+	router.GET("/block/:number", eth_block.GetBlockInfo)
 }

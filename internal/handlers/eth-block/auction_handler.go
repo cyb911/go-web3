@@ -1,12 +1,9 @@
-package handlers
+package eth_block
 
 import (
 	"fmt"
 	"go-web3/contracts/nftauction"
 	"go-web3/internal/infra/eth/event"
-	"math/big"
-
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // 拍卖合约事件处理器
@@ -17,15 +14,6 @@ func ListenerAuctionCreated(ctx *event.Context) error {
 	err := ctx.BindEvent(evt)
 	if err != nil {
 		return err
-	}
-
-	// 解析 indexed 参数 （topics）
-	topics := ctx.Log.Topics
-	if len(topics) >= 4 {
-		// topics[0] = 事件签名 hash，不解析
-		evt.AuctionId = new(big.Int).SetBytes(topics[1].Bytes())
-		evt.Seller = common.BytesToAddress(topics[2].Bytes())
-		evt.Nft = common.BytesToAddress(topics[3].Bytes())
 	}
 
 	fmt.Println("---- AuctionCreated ----")

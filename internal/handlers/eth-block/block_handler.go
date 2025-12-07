@@ -1,4 +1,4 @@
-package handlers
+package eth_block
 
 import (
 	"go-web3/internal/constants"

@@ -3,7 +3,7 @@ package router_event
 import (
 	"go-web3/contracts/constants"
 	"go-web3/contracts/nftauction"
-	"go-web3/internal/handlers"
+	"go-web3/internal/handlers/eth-block"
 	"go-web3/internal/infra/eth"
 	"go-web3/internal/infra/eth/event"
 	"log"
@@ -20,6 +20,6 @@ func SetupRouter() *event.Router {
 	event.RegisterABI("NftAuctionV1", parsedABI, constants.ADDRESS_NFT_AUCTION)
 	eventRouter.Use(event.Recover(), event.Logger())
 	eventRouter.Event("NftAuctionV1", "AuctionCreated").
-		Use(handlers.ListenerAuctionCreated)
+		Use(eth_block.ListenerAuctionCreated)
 	return eventRouter
 }
