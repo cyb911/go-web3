@@ -30,7 +30,7 @@ func (r *Route) BuildHandler() EventHandler {
 	}
 
 	// 如果多个 handler，合并成一个顺序执行的 handler
-	var final EventHandler = r.handlers[0]
+	var final = r.handlers[0]
 	for i := 1; i < len(r.handlers); i++ {
 		h := r.handlers[i]
 		prev := final
@@ -100,6 +100,7 @@ func (r *Router) listenRoute(rt *Route) {
 				ContractName: rt.Contract,
 				EventName:    rt.Event,
 				Logger:       r.Logger,
+				ABIInfo:      abiInfo,
 				ABIEventUnpack: func(out interface{}, log types.Log) error {
 					return abiInfo.ABI.UnpackIntoInterface(out, rt.Event, log.Data)
 				},
