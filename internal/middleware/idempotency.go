@@ -62,7 +62,7 @@ func Idempotency() gin.HandlerFunc {
 		key := c.Request.Header.Get("X-Idempotency-Key")
 
 		if key == "" {
-			utils.FailMsg(c, constants.MissingFieldError, "X-Idempotency-Key is required")
+			utils.FailMsg(c, constants.MissingHeadFieldError, "X-Idempotency-Key is required")
 			c.Abort()
 			return
 		}

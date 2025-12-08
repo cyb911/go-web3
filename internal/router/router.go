@@ -4,6 +4,7 @@ import (
 	"go-web3/internal/constants"
 	"go-web3/internal/infra/eth"
 	"go-web3/internal/infra/redis"
+	"go-web3/internal/middleware"
 	"go-web3/internal/utils"
 	"log"
 	"runtime/debug"
@@ -52,7 +53,7 @@ func SetupRouter() *gin.Engine {
 	registerAccountRoutes(accountGroup)
 
 	// 合约交互
-	contractGroup := r.Group("/contract/nft/auction")
+	contractGroup := r.Group("/contract/nft/auction", middleware.Idempotency())
 	registerContractRoutes(contractGroup)
 
 	return r

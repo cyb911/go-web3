@@ -10,6 +10,8 @@ const (
 	// ParamError 参数类错误。统一用E1开头
 	ParamError        = "E10001"
 	MissingFieldError = "E10002"
+	// MissingHeadFieldError 请求头参数缺失
+	MissingHeadFieldError = "E10003"
 
 	// UserNotFound 业务类错误，统一用E2开头
 	UserNotFound     = "E20001"

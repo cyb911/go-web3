@@ -3,7 +3,9 @@ package eth
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
@@ -101,6 +103,11 @@ retry:
 		return nil, err
 	}
 
+	// 模拟执行（eth-call）.避免失败扣除gas
+	if err := t.SimulateCall(*dryTx.To(), dryTx.Data(), auth.Value); err != nil {
+		return nil, err
+	}
+
 	// gas 估算
 	gas, err := t.EstimateGas(ctx, dryTx, auth)
 	if err != nil {
@@ -125,4 +132,40 @@ retry:
 	}
 
 	return tx, nil
+}
+
+func (t *Transactor) SimulateCall(to common.Address, data []byte, value *big.Int) error {
+	msg := ethereum.CallMsg{
+		From: t.from,
+		To:   &to,
+		Data: data,
+		Value: func() *big.Int {
+			if value == nil {
+				return big.NewInt(0)
+			}
+			return value
+		}(),
+	}
+
+	_, err := t.client.CallContract(context.Background(), msg, nil)
+	if err != nil {
+		// 解析 revert reason
+		return decodeRevertReason(err)
+	}
+	return nil
+}
+
+func decodeRevertReason(err error) error {
+	errStr := err.Error()
+
+	// geth/erigon 统一格式：execution reverted: reason
+	if strings.Contains(errStr, "execution reverted:") {
+		parts := strings.SplitN(errStr, "execution reverted:", 2)
+		if len(parts) == 2 {
+			return fmt.Errorf(strings.TrimSpace(parts[1]))
+		}
+	}
+
+	// 没有 reason（fallback）
+	return fmt.Errorf("execution reverted")
 }
