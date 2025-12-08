@@ -18,11 +18,37 @@ var (
 	loadErr         error
 )
 
-func GetPrivateKey() (*ecdsa.PrivateKey, error) {
+// GetPrivateKeyTemp 弃用，基础设施模块下的代码，不能依赖外部代码
+func GetPrivateKeyTemp() (*ecdsa.PrivateKey, error) {
 	loadOnce.Do(func() {
 		cfg := config.Get().EthConfig()
 		privateKeyHex := cfg.Private
 		privateKeyHex = strings.TrimSpace(privateKeyHex)
+		if privateKeyHex == "" {
+			loadErr = errors.New("missing ETH_PRIVATE in config")
+			return
+		}
+
+		if len(privateKeyHex) != 64 {
+			loadErr = errors.New("invalid private key length: should be 64 hex characters")
+			return
+		}
+
+		privateKey, err := crypto.HexToECDSA(privateKeyHex)
+		if err != nil {
+			loadErr = errors.New("failed to parse private key: " + err.Error())
+			return
+		}
+		cachePrivateKey = privateKey
+	})
+
+	return cachePrivateKey, loadErr
+}
+
+// GetPrivateKey 私钥解析
+func GetPrivateKey(privateKey string) (*ecdsa.PrivateKey, error) {
+	loadOnce.Do(func() {
+		privateKeyHex := strings.TrimSpace(privateKey)
 		if privateKeyHex == "" {
 			loadErr = errors.New("missing ETH_PRIVATE in config")
 			return

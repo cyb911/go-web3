@@ -9,10 +9,12 @@ import (
 	"go-web3/contracts/nftauction"
 	"go-web3/internal/config"
 	"go-web3/internal/infra/eth"
+	"go-web3/internal/infra/redis"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -73,5 +75,29 @@ func SettleAuction(auctionId *big.Int) error {
 	fmt.Println("tx sent:", tx.Hash().Hex())
 
 	return nil
+
+}
+
+func CancelAuction(auctionId *big.Int) error {
+	factory := eth.NewEthFactory(eth.EthClient, redis.Rdb)
+
+	ts := factory.NewTransactor(config.Get().EthConfig().Private)
+
+	auction, _ := nftauction.NewNftauctionTransactor(
+		common.HexToAddress(constants.ADDRESS_NFT_AUCTION),
+		eth.EthClient,
+	)
+
+	tx, err := ts.SendTx(func(auth *bind.TransactOpts) (*types.Transaction, error) {
+		return auction.CancelAuction(auth, auctionId)
+	})
+
+	if err != nil {
+		return fmt.Errorf("send tx failed: %w", err)
+	}
+
+	fmt.Println("tx:", tx.Hash().Hex())
+
+	return err
 
 }

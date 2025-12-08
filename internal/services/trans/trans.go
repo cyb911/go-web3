@@ -142,7 +142,7 @@ func Trans(to string, amountEth string) (string, error) {
 	err = eth.EthClient.SendTransaction(ctx, signTx)
 	if err != nil {
 		// 判断 nonce 是否与链上数据不一致。不一致强制同步链上 nonce
-		if eth.ShouldSyncNonceFromChain(err) {
+		if eth.IsNonceError(err) {
 			_ = eth.NonceMgr.ForceSyncNonce(ctx, from)
 		}
 		return "", err

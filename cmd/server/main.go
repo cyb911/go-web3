@@ -26,8 +26,8 @@ func main() {
 	// 异步执行，不要阻塞main导致gin无法启动
 	go eventRouter.Listen()
 	// --- 启动 Scanner
-	scanner := ethevent.SetupScanner()
-	go scanner.Start()
+	//scanner := ethevent.SetupScanner()
+	//go scanner.Start()
 
 	// 设置路由
 	r := router.SetupRouter()

@@ -6,6 +6,7 @@ import (
 	"go-web3/internal/infra/redis"
 	"go-web3/internal/utils"
 	"log"
+	"runtime/debug"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,7 @@ func SetupRouter() *gin.Engine {
 	r.Use(func(c *gin.Context) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				log.Printf("panic: %v", rec)
+				log.Printf("[STACK] %s", debug.Stack())
 				utils.FailMsg(c, constants.InternalServerError, "系统内部错误！")
 			}
 		}()
@@ -42,7 +43,7 @@ func SetupRouter() *gin.Engine {
 	})
 
 	r.GET("/health/eth", func(c *gin.Context) {
-		key, _ := eth.GetPrivateKey()
+		key, _ := eth.GetPrivateKeyTemp()
 		utils.OkData(c, key)
 	})
 

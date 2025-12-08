@@ -57,7 +57,7 @@ func (nm *NonceManager) releaseLock(ctx context.Context, key string) {
 	nm.redis.Del(ctx, key)
 }
 
-// GetNextNonce 获取 nonce
+// GetNextNonce 获取账户地址 nonce
 func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (uint64, error) {
 	lock := nm.lockKey(addr)
 
@@ -106,7 +106,7 @@ func (nm *NonceManager) GetNextNonce(ctx context.Context, addr common.Address) (
 	return nonce, nil
 }
 
-func ShouldSyncNonceFromChain(err error) bool {
+func IsNonceError(err error) bool {
 	if err == nil {
 		return false
 	}
