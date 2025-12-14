@@ -9,6 +9,7 @@ import (
 	"go-web3/contracts/nftauction"
 	"go-web3/internal/config"
 	"go-web3/internal/infra/eth"
+	"go-web3/internal/infra/eth/trans"
 	"go-web3/internal/infra/redis"
 	"math/big"
 
@@ -79,7 +80,7 @@ func SettleAuction(auctionId *big.Int) error {
 }
 
 func CancelAuction(auctionId *big.Int) error {
-	factory := eth.NewEthFactory(eth.EthClient, redis.Rdb)
+	factory := trans.NewEthFactory(eth.EthClient, redis.Rdb)
 
 	ts := factory.NewTransactor(config.Get().EthConfig().Private)
 

@@ -1,9 +1,10 @@
-package eth
+package trans
 
 import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"go-web3/internal/infra/eth/nonce"
 	"math/big"
 	"strings"
 	"time"
@@ -19,13 +20,13 @@ import (
 // Transactor —— 链上交易发送器
 type Transactor struct {
 	client     *ethclient.Client
-	nonceMgr   *NonceManager
+	nonceMgr   *nonce.NonceManager
 	privateKey *ecdsa.PrivateKey
 	from       common.Address
 	chainID    *big.Int
 }
 
-func NewTransactor(client *ethclient.Client, nonceMgr *NonceManager, privateKey *ecdsa.PrivateKey) (*Transactor, error) {
+func NewTransactor(client *ethclient.Client, nonceMgr *nonce.NonceManager, privateKey *ecdsa.PrivateKey) (*Transactor, error) {
 	from := crypto.PubkeyToAddress(privateKey.PublicKey)
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
@@ -119,7 +120,7 @@ retry:
 	tx, err := txFunc(auth)
 	if err != nil {
 		// 自动处理 nonce 冲突
-		if IsNonceError(err) {
+		if nonce.IsNonceError(err) {
 			// 同步链上 nonce
 			err := t.nonceMgr.ForceSyncNonce(ctx, t.from)
 			if err != nil {

@@ -1,6 +1,9 @@
-package eth
+package trans
 
 import (
+	"go-web3/internal/infra/eth"
+	"go-web3/internal/infra/eth/nonce"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/redis/go-redis/v9"
@@ -8,17 +11,17 @@ import (
 
 type EthFactory struct {
 	Client       *ethclient.Client
-	NonceManager *NonceManager
+	NonceManager *nonce.NonceManager
 }
 
 func NewEthFactory(client *ethclient.Client, rdb *redis.Client) *EthFactory {
 	// 先判断 nonce 管理器 是否已经构建出
-	var nonceManager *NonceManager
+	var nonceManager *nonce.NonceManager
 
-	if NonceMgr == nil {
-		nonceManager = NewNonceManager(rdb, client)
+	if eth.NonceMgr == nil {
+		nonceManager = nonce.NewNonceManager(rdb, client)
 	} else {
-		nonceManager = NonceMgr
+		nonceManager = eth.NonceMgr
 	}
 	return &EthFactory{
 		Client:       client,

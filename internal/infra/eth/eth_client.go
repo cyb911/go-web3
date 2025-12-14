@@ -3,6 +3,7 @@ package eth
 import (
 	"context"
 	"go-web3/internal/config"
+	"go-web3/internal/infra/eth/nonce"
 	"log"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -12,7 +13,7 @@ import (
 
 var EthClient *ethclient.Client
 var EthWssClient *ethclient.Client
-var NonceMgr *NonceManager
+var NonceMgr *nonce.NonceManager
 
 func InitEthClient() {
 	cfg := config.Get().EthConfig()
@@ -32,7 +33,7 @@ func InitEthClient() {
 }
 
 func InitNonce(redis *redis.Client) {
-	NonceMgr = NewNonceManager(redis, EthClient)
+	NonceMgr = nonce.NewNonceManager(redis, EthClient)
 
 	ctx := context.Background()
 	cfg := config.Get().EthConfig()

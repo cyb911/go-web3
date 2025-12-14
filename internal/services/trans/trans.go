@@ -6,6 +6,7 @@ import (
 	"errors"
 	"go-web3/internal/config"
 	"go-web3/internal/infra/eth"
+	"go-web3/internal/infra/eth/nonce"
 	"go-web3/internal/utils"
 	"math/big"
 
@@ -83,7 +84,7 @@ func Trans(to string, amountEth string) (string, error) {
 	from := crypto.PubkeyToAddress(*publicKey)
 
 	// nonce
-	nonce, err := eth.NonceMgr.GetNextNonce(ctx, from)
+	_nonce, err := eth.NonceMgr.GetNextNonce(ctx, from)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +122,7 @@ func Trans(to string, amountEth string) (string, error) {
 	}
 	txData := &types.DynamicFeeTx{
 		ChainID:   chainID,
-		Nonce:     nonce,
+		Nonce:     _nonce,
 		GasTipCap: tipCap,
 		GasFeeCap: maxFeePerGas,
 		Gas:       gasLimit,
@@ -142,7 +143,7 @@ func Trans(to string, amountEth string) (string, error) {
 	err = eth.EthClient.SendTransaction(ctx, signTx)
 	if err != nil {
 		// 判断 nonce 是否与链上数据不一致。不一致强制同步链上 nonce
-		if eth.IsNonceError(err) {
+		if nonce.IsNonceError(err) {
 			_ = eth.NonceMgr.ForceSyncNonce(ctx, from)
 		}
 		return "", err
